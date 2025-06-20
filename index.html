@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -911,7 +909,11 @@
         
         // Get base font size in pixels for rem calculations
         function getBaseFontSize() {
-            return parseFloat(getComputedStyle(document.documentElement).fontSize);
+            // ROBUSTNESS FIX: Add a fallback to prevent NaN issues if computed style is not
+            // available immediately. This can happen due to network latency on remote servers,
+            // causing characters to fail to render.
+            const size = parseFloat(getComputedStyle(document.documentElement).fontSize);
+            return !isNaN(size) && size > 0 ? size : 16;
         }
         
         const DESKTOP_CONFIG = {
@@ -1111,10 +1113,7 @@
             showStartScreen();
             
             // Update config on resize
-            window.addEventListener('resize', () => {
-                updateGameConfigPixels();
-                resizeAndDraw();
-            });
+            window.addEventListener('resize', resizeAndDraw);
         }
 
         // --- FIXED MOBILE TOUCH HANDLING ---
@@ -1686,6 +1685,7 @@
         // --- NEW: SVG-Style Vector Art System ---
         function drawVectorAnimal(animal, type, isDark) {
             const { x, y, radius } = animal;
+            if (!radius || isNaN(radius)) return; // Failsafe if radius is invalid
             const theme = themes[currentTheme];
             ctx.save();
             ctx.translate(x, y);
@@ -1854,12 +1854,13 @@
             return `#${T(R)}${T(G)}${T(B)}`; 
         }
 
-        function resizeAndDraw() { 
-            resizeCanvas(); 
-            if (!isGameOver && !isGamePaused) { 
-                updateDarkcatPosition(); 
-                draw(); 
-            } 
+        // ROBUSTNESS FIX: Correctly handle window resizing to prevent stale config values.
+        function resizeAndDraw() {
+            resizeCanvas();
+            updateGameConfigPixels();
+            lightcat.radius = darkcat.radius = GAME_CONFIG.CAT_RADIUS;
+            updateDarkcatPosition();
+            draw();
         }
         
         function updateDarkcatPosition() { 
@@ -1981,4 +1982,3 @@
     </script>
 </body>
 </html>
---- END OF FILE mirror_mirror_fixed (10).html ---
