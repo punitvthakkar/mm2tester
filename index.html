@@ -10,16 +10,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /*
-Mirror Mirror - v6.2 (Visual & Bugfix Update)
+Mirror Mirror - v6.1 (UI/UX & Bugfix Update)
 ----------------------------------------------------------------
-- FIXED: Invisible dark character by revising the color logic to ensure it's always visible against the background.
-- IMPROVED: Character rendering for better contrast and visibility across all themes.
 - FIXED: Duplicate score/chain display on certain screen sizes by synchronizing HUD logic.
 - ADDED: Tabbed interface for start and game-over screens to de-clutter the UI and improve visibility.
+- RE-ORGANIZED: UI elements into logical tabs (Play/Results, Scores, Options).
 */
-        
 
-    :root {
+
+        :root {
         /* Base font size for scaling */
         font-size: 16px;
         
@@ -556,16 +555,14 @@ Mirror Mirror - v6.2 (Visual & Bugfix Update)
         .game-hud { font-size: 0.8rem; padding: 0.6rem 1rem; }
     }
 </style>
-
-</head>
+    </head>
 <body>
 <div class="game-container">
 <div class="game-hud">
 <div class="hud-score">SCORE:000000</div>
 <div class="hud-chain">CHAIN:x1</div>
 </div>
-
-<button class="theme-menu-btn hidden" id="themeMenuBtn" title="Change Theme">🎨</button>
+    <button class="theme-menu-btn hidden" id="themeMenuBtn" title="Change Theme">🎨</button>
 
     <canvas id="gameCanvas"></canvas>
     
@@ -1450,21 +1447,8 @@ Mirror Mirror - v6.2 (Visual & Bugfix Update)
     function drawVectorAnimal(animal, type, isDark) {
         const { x, y, radius } = animal; const theme = themes[currentTheme];
         ctx.save(); ctx.translate(x, y);
-
-        // REVISED LOGIC: Ensure both characters are always visible with good contrast.
-        // The dark character was previously filled with the background color, making it invisible.
-        let fillColor, accentColor;
-        if (isDark) {
-            // Dark character: Use the darker 'barrier-color' for the body and the bright 'light-color' for accents.
-            fillColor = theme['--barrier-color'];
-            accentColor = theme['--light-color'];
-        } else {
-            // Light character: Use the bright 'light-color' for the body and the darker 'barrier-color' for accents.
-            // This is also an improvement, as using '--bg-color' for accents could look like a "cutout" with jagged edges.
-            fillColor = theme['--light-color'];
-            accentColor = theme['--barrier-color'];
-        }
-
+        const fillColor = isDark ? theme['--bg-color'] : theme['--light-color'];
+        const accentColor = isDark ? theme['--light-color'] : theme['--bg-color'];
         switch(type) {
             case 'cat': drawVectorCat(radius, fillColor, accentColor); break;
             case 'dog': drawVectorDog(radius, fillColor, accentColor); break;
